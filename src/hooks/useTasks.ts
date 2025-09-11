@@ -30,6 +30,8 @@ export const useTasks = () => {
       title,
       description,
       completed: false,
+      progress: 0,
+      status: 'not-started',
       dueDate,
       createdAt: new Date().toISOString(),
     };
@@ -42,6 +44,8 @@ export const useTasks = () => {
         ? { 
             ...task, 
             completed: !task.completed,
+            progress: !task.completed ? 100 : task.progress,
+            status: !task.completed ? 'completed' : task.progress > 0 ? 'in-progress' : 'not-started',
             completedAt: !task.completed ? new Date().toISOString() : undefined
           }
         : task
@@ -53,9 +57,29 @@ export const useTasks = () => {
   };
 
   const updateTask = (id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => {
-    setTasks(prev => prev.map(task => 
-      task.id === id ? { ...task, ...updates } : task
-    ));
+    setTasks(prev => prev.map(task => {
+      if (task.id === id) {
+        const updatedTask = { ...task, ...updates };
+        // Auto-update status based on progress
+        if (updates.progress !== undefined) {
+          if (updates.progress === 100) {
+            updatedTask.completed = true;
+            updatedTask.status = 'completed';
+            updatedTask.completedAt = new Date().toISOString();
+          } else if (updates.progress > 0) {
+            updatedTask.completed = false;
+            updatedTask.status = 'in-progress';
+            updatedTask.completedAt = undefined;
+          } else {
+            updatedTask.completed = false;
+            updatedTask.status = 'not-started';
+            updatedTask.completedAt = undefined;
+          }
+        }
+        return updatedTask;
+      }
+      return task;
+    }));
   };
 
   const filteredTasks = tasks.filter(task => {
@@ -64,6 +88,8 @@ export const useTasks = () => {
         return !task.completed;
       case 'completed':
         return task.completed;
+      case 'in-progress':
+        return task.status === 'in-progress';
       default:
         return true;
     }
@@ -73,6 +99,7 @@ export const useTasks = () => {
     total: tasks.length,
     active: tasks.filter(t => !t.completed).length,
     completed: tasks.filter(t => t.completed).length,
+    inProgress: tasks.filter(t => t.status === 'in-progress').length,
   };
 
   return {

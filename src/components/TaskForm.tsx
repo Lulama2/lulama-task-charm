@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
 import { 
   Dialog, 
   DialogContent, 
@@ -33,16 +34,19 @@ export const TaskForm = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [progress, setProgress] = useState([0]);
 
   useEffect(() => {
     if (editingTask) {
       setTitle(editingTask.title);
       setDescription(editingTask.description || '');
       setDueDate(editingTask.dueDate || '');
+      setProgress([editingTask.progress || 0]);
     } else {
       setTitle('');
       setDescription('');
       setDueDate('');
+      setProgress([0]);
     }
   }, [editingTask, isOpen]);
 
@@ -56,6 +60,7 @@ export const TaskForm = ({
         title: title.trim(),
         description: description.trim() || undefined,
         dueDate: dueDate || undefined,
+        progress: progress[0],
       });
     } else {
       onSubmit(
@@ -68,6 +73,7 @@ export const TaskForm = ({
     setTitle('');
     setDescription('');
     setDueDate('');
+    setProgress([0]);
     onClose();
   };
 
@@ -75,6 +81,7 @@ export const TaskForm = ({
     setTitle('');
     setDescription('');
     setDueDate('');
+    setProgress([0]);
     onClose();
   };
 
@@ -131,6 +138,26 @@ export const TaskForm = ({
               <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             </div>
           </div>
+
+          {editingTask && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                Progress: {progress[0]}%
+              </Label>
+              <Slider
+                value={progress}
+                onValueChange={setProgress}
+                max={100}
+                step={5}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>0%</span>
+                <span>50%</span>
+                <span>100%</span>
+              </div>
+            </div>
+          )}
           
           <DialogFooter className="gap-2 pt-4">
             <Button 

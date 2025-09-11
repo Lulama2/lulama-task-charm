@@ -38,6 +38,7 @@ const Index = () => {
   const filterOptions: { value: TaskStatus; label: string; count: number }[] = [
     { value: 'all', label: 'All Tasks', count: taskStats.total },
     { value: 'active', label: 'Active', count: taskStats.active },
+    { value: 'in-progress', label: 'In Progress', count: taskStats.inProgress },
     { value: 'completed', label: 'Completed', count: taskStats.completed },
   ];
 
@@ -120,20 +121,24 @@ const Index = () => {
                 <Plus className="w-8 h-8 text-primary" />
               </div>
               <h3 className="text-lg font-medium text-foreground mb-2">
-                {filter === 'completed' 
-                  ? 'No completed tasks yet' 
-                  : filter === 'active' 
-                  ? 'No active tasks' 
-                  : 'No tasks created yet'
-                }
+              {filter === 'completed' 
+                ? 'No completed tasks yet' 
+                : filter === 'active' 
+                ? 'No active tasks' 
+                : filter === 'in-progress'
+                ? 'No tasks in progress'
+                : 'No tasks created yet'
+              }
               </h3>
               <p className="text-muted-foreground mb-6">
-                {filter === 'all' 
-                  ? 'Get started by creating your first task!' 
-                  : filter === 'active' 
-                  ? 'All your tasks are completed. Great job!' 
-                  : 'Complete some tasks to see them here.'
-                }
+              {filter === 'all' 
+                ? 'Get started by creating your first task!' 
+                : filter === 'active' 
+                ? 'All your tasks are completed. Great job!' 
+                : filter === 'in-progress'
+                ? 'Start working on some tasks to see them here.'
+                : 'Complete some tasks to see them here.'
+              }
               </p>
               {filter === 'all' && (
                 <Button 
@@ -155,6 +160,7 @@ const Index = () => {
                   onToggle={toggleTask}
                   onDelete={deleteTask}
                   onEdit={handleEditTask}
+                  onUpdateProgress={(id, progress) => updateTask(id, { progress })}
                 />
               ))}
             </div>

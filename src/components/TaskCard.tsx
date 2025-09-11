@@ -4,13 +4,15 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Slider } from '@/components/ui/slider';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Calendar, Clock, MoreVertical, Trash2, Edit } from 'lucide-react';
+import { Calendar, Clock, MoreVertical, Trash2, Edit, Play, Pause } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, isAfter, isBefore, addDays } from 'date-fns';
 
@@ -19,10 +21,12 @@ interface TaskCardProps {
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
   onEdit: (task: Task) => void;
+  onUpdateProgress: (id: string, progress: number) => void;
 }
 
-export const TaskCard = ({ task, onToggle, onDelete, onEdit }: TaskCardProps) => {
+export const TaskCard = ({ task, onToggle, onDelete, onEdit, onUpdateProgress }: TaskCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [showProgressSlider, setShowProgressSlider] = useState(false);
 
   const getDueDateStatus = () => {
     if (!task.dueDate) return null;
@@ -41,6 +45,23 @@ export const TaskCard = ({ task, onToggle, onDelete, onEdit }: TaskCardProps) =>
   };
 
   const dueDateInfo = getDueDateStatus();
+
+  const getStatusBadge = () => {
+    switch (task.status) {
+      case 'not-started':
+        return { variant: 'secondary' as const, label: 'Not Started', icon: null };
+      case 'in-progress':
+        return { variant: 'default' as const, label: 'In Progress', icon: Play };
+      case 'completed':
+        return { variant: 'default' as const, label: 'Completed', icon: null };
+    }
+  };
+
+  const statusInfo = getStatusBadge();
+
+  const handleProgressChange = (value: number[]) => {
+    onUpdateProgress(task.id, value[0]);
+  };
 
   return (
     <Card 
@@ -61,12 +82,32 @@ export const TaskCard = ({ task, onToggle, onDelete, onEdit }: TaskCardProps) =>
           />
           
           <div className="flex-1 min-w-0">
-            <h3 className={cn(
-              "font-medium text-foreground transition-all duration-200",
-              task.completed && "line-through text-muted-foreground"
-            )}>
-              {task.title}
-            </h3>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className={cn(
+                "font-medium text-foreground transition-all duration-200",
+                task.completed && "line-through text-muted-foreground"
+              )}>
+                {task.title}
+              </h3>
+              
+              <Badge 
+                variant={statusInfo.variant}
+                className={cn(
+                  "text-xs font-medium",
+                  task.status === 'in-progress' && "bg-primary text-primary-foreground",
+                  task.status === 'completed' && "bg-success text-success-foreground"
+                )}
+              >
+                {statusInfo.icon && <statusInfo.icon className="w-3 h-3 mr-1" />}
+                {statusInfo.label}
+              </Badge>
+              
+              {task.progress > 0 && task.progress < 100 && (
+                <Badge variant="outline" className="text-xs">
+                  {task.progress}%
+                </Badge>
+              )}
+            </div>
             
             {task.description && (
               <p className={cn(
@@ -75,6 +116,44 @@ export const TaskCard = ({ task, onToggle, onDelete, onEdit }: TaskCardProps) =>
               )}>
                 {task.description}
               </p>
+            )}
+            
+            {/* Progress Bar */}
+            {(task.progress > 0 || task.status === 'in-progress') && (
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Progress</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto p-1 text-xs"
+                    onClick={() => setShowProgressSlider(!showProgressSlider)}
+                  >
+                    Update
+                  </Button>
+                </div>
+                <Progress 
+                  value={task.progress} 
+                  className="h-2"
+                />
+                
+                {showProgressSlider && !task.completed && (
+                  <div className="pt-2">
+                    <Slider
+                      value={[task.progress]}
+                      onValueChange={handleProgressChange}
+                      max={100}
+                      step={5}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                      <span>0%</span>
+                      <span>50%</span>
+                      <span>100%</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
             
             <div className="flex items-center gap-2 mt-3">
@@ -113,6 +192,10 @@ export const TaskCard = ({ task, onToggle, onDelete, onEdit }: TaskCardProps) =>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowProgressSlider(!showProgressSlider)}>
+                <Play className="w-4 h-4 mr-2" />
+                Update Progress
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onEdit(task)}>
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
