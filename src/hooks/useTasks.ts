@@ -24,16 +24,17 @@ export const useTasks = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   }, [tasks]);
 
-  const addTask = (title: string, description?: string, dueDate?: string) => {
+  const addTask = (title: string, description?: string, dueDate?: string, progress: number = 0) => {
     const newTask: Task = {
       id: crypto.randomUUID(),
       title,
       description,
-      completed: false,
-      progress: 0,
-      status: 'not-started',
+      completed: progress === 100,
+      progress,
+      status: progress === 100 ? 'completed' : progress > 0 ? 'in-progress' : 'not-started',
       dueDate,
       createdAt: new Date().toISOString(),
+      completedAt: progress === 100 ? new Date().toISOString() : undefined,
     };
     setTasks(prev => [newTask, ...prev]);
   };

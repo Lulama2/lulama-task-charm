@@ -118,43 +118,50 @@ export const TaskCard = ({ task, onToggle, onDelete, onEdit, onUpdateProgress }:
               </p>
             )}
             
-            {/* Progress Bar */}
-            {(task.progress > 0 || task.status === 'in-progress') && (
-              <div className="mt-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Progress</span>
+            {/* Progress Bar - Always Show */}
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">
+                  Progress: {task.progress}%
+                </span>
+                {!task.completed && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-auto p-1 text-xs"
+                    className="h-auto p-1 text-xs hover:bg-primary/10"
                     onClick={() => setShowProgressSlider(!showProgressSlider)}
                   >
-                    Update
+                    {showProgressSlider ? 'Hide' : 'Update'}
                   </Button>
-                </div>
-                <Progress 
-                  value={task.progress} 
-                  className="h-2"
-                />
-                
-                {showProgressSlider && !task.completed && (
-                  <div className="pt-2">
-                    <Slider
-                      value={[task.progress]}
-                      onValueChange={handleProgressChange}
-                      max={100}
-                      step={5}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                      <span>0%</span>
-                      <span>50%</span>
-                      <span>100%</span>
-                    </div>
-                  </div>
                 )}
               </div>
-            )}
+              <Progress 
+                value={task.progress} 
+                className="h-3"
+              />
+              
+              {showProgressSlider && !task.completed && (
+                <div className="pt-2 space-y-2">
+                  <Slider
+                    value={[task.progress]}
+                    onValueChange={handleProgressChange}
+                    max={100}
+                    step={5}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>0%</span>
+                    <span>25%</span>
+                    <span>50%</span>
+                    <span>75%</span>
+                    <span>100%</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground italic">
+                    Adjust the slider to indicate how close you are to completing this task
+                  </p>
+                </div>
+              )}
+            </div>
             
             <div className="flex items-center gap-2 mt-3">
               {task.dueDate && dueDateInfo && (

@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 interface TaskFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (title: string, description?: string, dueDate?: string) => void;
+  onSubmit: (title: string, description?: string, dueDate?: string, progress?: number) => void;
   editingTask?: Task | null;
   onUpdate?: (id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => void;
 }
@@ -66,7 +66,8 @@ export const TaskForm = ({
       onSubmit(
         title.trim(),
         description.trim() || undefined,
-        dueDate || undefined
+        dueDate || undefined,
+        progress[0]
       );
     }
     
@@ -139,25 +140,26 @@ export const TaskForm = ({
             </div>
           </div>
 
-          {editingTask && (
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                Progress: {progress[0]}%
-              </Label>
-              <Slider
-                value={progress}
-                onValueChange={setProgress}
-                max={100}
-                step={5}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>0%</span>
-                <span>50%</span>
-                <span>100%</span>
-              </div>
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">
+              Progress: {progress[0]}%
+            </Label>
+            <Slider
+              value={progress}
+              onValueChange={setProgress}
+              max={100}
+              step={5}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>0%</span>
+              <span>50%</span>
+              <span>100%</span>
             </div>
-          )}
+            <p className="text-xs text-muted-foreground">
+              Set your initial progress or update how far you are from completing this task
+            </p>
+          </div>
           
           <DialogFooter className="gap-2 pt-4">
             <Button 
